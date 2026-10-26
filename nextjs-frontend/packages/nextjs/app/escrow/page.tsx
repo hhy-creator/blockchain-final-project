@@ -155,6 +155,7 @@ export default function EscrowPage() {
   const { data: escrowInfo } = useDeployedContractInfo({ contractName: "Escrow" });
   const { data: tokenInfo } = useDeployedContractInfo({ contractName: TOKEN_NAME });
   const { data: arbiter } = useScaffoldReadContract({ contractName: "Escrow", functionName: "arbiter" });
+  const { data: orderCount } = useScaffoldReadContract({ contractName: "Escrow", functionName: "orderCount" });
   const { writeContractAsync: writeEscrow } = useScaffoldWriteContract({ contractName: "Escrow" });
   const { data: createdEvents, isLoading: eventsLoading } = useScaffoldEventHistory({
     contractName: "Escrow",
@@ -211,10 +212,14 @@ export default function EscrowPage() {
     const values = (createdEvents ?? [])
       .map(event => event.args?.id)
       .filter((id): id is bigint => typeof id === "bigint");
+    // Keep the event-derived ids, but use orderCount as a live fallback while
+    // POTOS finishes its batched historical log query.
+    const count = typeof orderCount === "bigint" ? Number(orderCount) : 0;
+    for (let index = 0; index < count; index++) values.push(BigInt(index));
     return [...new Set(values.map(value => value.toString()))]
       .map(value => BigInt(value))
       .sort((a, b) => (a < b ? 1 : -1));
-  }, [createdEvents]);
+  }, [createdEvents, orderCount]);
 
   const currentRole = useMemo(() => {
     if (!address) return "未连接钱包";
