@@ -32,6 +32,11 @@ web3j {
     generatedFilesBaseDir = 'src'
 }
 
+// Use the Node.js installation already available on PATH in the course environment.
+node {
+    download = false
+}
+
 sourceSets {
     main {
         solidity {
