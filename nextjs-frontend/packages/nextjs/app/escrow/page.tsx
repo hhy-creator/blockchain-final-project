@@ -17,6 +17,7 @@ const STATUS = HAS_SHIPPED_STATUS
   ? (["Created", "Paid", "Shipped", "Completed", "Refunded", "Disputed"] as const)
   : (["Created", "Paid", "Completed", "Refunded", "Disputed"] as const);
 const TOKEN_NAME = "LTCToken" as const;
+const EVENT_BATCH_SIZE = 1000;
 
 type OrderData = {
   buyer: Address;
@@ -168,14 +169,14 @@ export default function EscrowPage() {
     eventName: "OrderCreated",
     fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0),
     watch: true,
-    blocksBatchSize: 10,
+    blocksBatchSize: EVENT_BATCH_SIZE,
   });
-  const { data: paidEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderPaid", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
-  const { data: shippedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderShipped", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
-  const { data: disputedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderDisputed", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
-  const { data: completedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderCompleted", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
-  const { data: refundedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderRefunded", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
-  const { data: resolvedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderResolved", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
+  const { data: paidEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderPaid", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: EVENT_BATCH_SIZE });
+  const { data: shippedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderShipped", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: EVENT_BATCH_SIZE });
+  const { data: disputedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderDisputed", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: EVENT_BATCH_SIZE });
+  const { data: completedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderCompleted", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: EVENT_BATCH_SIZE });
+  const { data: refundedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderRefunded", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: EVENT_BATCH_SIZE });
+  const { data: resolvedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderResolved", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: EVENT_BATCH_SIZE });
 
   const timelineByOrder = useMemo(() => {
     const all: TimelineEvent[] = [];
