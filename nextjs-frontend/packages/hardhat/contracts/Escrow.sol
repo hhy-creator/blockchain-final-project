@@ -8,7 +8,7 @@ interface IERC20 {
 }
 
 contract Escrow {
-    enum Status { Created, Paid, Completed, Refunded, Disputed }
+    enum Status { Created, Paid, Shipped, Completed, Refunded, Disputed }
 
     struct Order {
         address buyer;
@@ -26,6 +26,7 @@ contract Escrow {
 
     event OrderCreated(uint256 indexed id, address indexed buyer, address indexed seller, address token, uint256 amount, uint256 deadline);
     event OrderPaid(uint256 indexed id);
+    event OrderShipped(uint256 indexed id);
     event OrderCompleted(uint256 indexed id);
     event OrderRefunded(uint256 indexed id);
     event OrderDisputed(uint256 indexed id, address by);
@@ -37,6 +38,10 @@ contract Escrow {
     }
     modifier onlyBuyer(uint256 id) {
         require(msg.sender == _orders[id].buyer, "Escrow: caller is not the buyer");
+        _;
+    }
+    modifier onlySeller(uint256 id) {
+        require(msg.sender == _orders[id].seller, "Escrow: caller is not the seller");
         _;
     }
     modifier inStatus(uint256 id, Status s) {
@@ -78,7 +83,13 @@ contract Escrow {
     }
 
     // TODO 3
-    function confirm(uint256 id) public onlyBuyer(id) inStatus(id, Status.Paid) {
+    function markShipped(uint256 id) public onlySeller(id) inStatus(id, Status.Paid) {
+        _orders[id].status = Status.Shipped;
+        emit OrderShipped(id);
+    }
+
+    // The buyer can confirm only after the seller marks the order shipped.
+    function confirm(uint256 id) public onlyBuyer(id) inStatus(id, Status.Shipped) {
         Order storage o = _orders[id];
         o.status = Status.Completed;
         bool success = IERC20(o.token).transfer(o.seller, o.amount);
@@ -97,8 +108,12 @@ contract Escrow {
     }
 
     // TODO 5
-    function dispute(uint256 id) public inStatus(id, Status.Paid) {
+    function dispute(uint256 id) public {
         Order storage o = _orders[id];
+        require(
+            o.status == Status.Paid || o.status == Status.Shipped,
+            "Escrow: wrong status"
+        );
         require(msg.sender == o.buyer || msg.sender == o.seller, "Escrow: only buyer or seller can dispute");
         o.status = Status.Disputed;
         emit OrderDisputed(id, msg.sender);

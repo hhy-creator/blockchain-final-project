@@ -44,6 +44,7 @@ describe("Escrow", function () {
     await escrow.connect(buyer).createOrder(seller.address, await token.getAddress(), AMOUNT, deadline, "一本书");
     await token.connect(buyer).approve(await escrow.getAddress(), AMOUNT);
     await escrow.connect(buyer).deposit(0);
+    await escrow.connect(seller).markShipped(0);
     await expect(escrow.connect(stranger).confirm(0)).to.be.revertedWith("Escrow: caller is not the buyer");
   });
 
@@ -52,8 +53,9 @@ describe("Escrow", function () {
     await escrow.connect(buyer).createOrder(seller.address, await token.getAddress(), AMOUNT, deadline, "一本书");
     await token.connect(buyer).approve(await escrow.getAddress(), AMOUNT);
     await escrow.connect(buyer).deposit(0);
+    await expect(escrow.connect(seller).markShipped(0)).to.emit(escrow, "OrderShipped").withArgs(0);
     await expect(escrow.connect(buyer).confirm(0)).to.emit(escrow, "OrderCompleted").withArgs(0);
-    expect((await escrow.getOrder(0)).status).to.equal(2);
+    expect((await escrow.getOrder(0)).status).to.equal(3);
     expect(await token.balanceOf(seller.address)).to.equal(AMOUNT);
   });
 
@@ -62,10 +64,19 @@ describe("Escrow", function () {
     await escrow.connect(buyer).createOrder(seller.address, await token.getAddress(), AMOUNT, deadline, "一本书");
     await token.connect(buyer).approve(await escrow.getAddress(), AMOUNT);
     await escrow.connect(buyer).deposit(0);
+    await escrow.connect(seller).markShipped(0);
+    await expect(escrow.connect(buyer).refund(0)).to.be.revertedWith("Escrow: wrong status");
+  });
+
+  it("未发货订单超期后可以退款", async function () {
+    const { token, escrow, buyer, seller, deadline } = await loadFixture(deployFixture);
+    await escrow.connect(buyer).createOrder(seller.address, await token.getAddress(), AMOUNT, deadline, "一本书");
+    await token.connect(buyer).approve(await escrow.getAddress(), AMOUNT);
+    await escrow.connect(buyer).deposit(0);
     await expect(escrow.connect(buyer).refund(0)).to.be.revertedWith("Escrow: deadline not reached");
     await time.increase(3601);
     await expect(escrow.connect(buyer).refund(0)).to.emit(escrow, "OrderRefunded").withArgs(0);
-    expect((await escrow.getOrder(0)).status).to.equal(3);
+    expect((await escrow.getOrder(0)).status).to.equal(4);
     expect(await token.balanceOf(buyer.address)).to.equal(ethers.parseUnits("100", 18));
   });
 
@@ -74,6 +85,7 @@ describe("Escrow", function () {
     await escrow.connect(buyer).createOrder(seller.address, await token.getAddress(), AMOUNT, deadline, "一本书");
     await token.connect(buyer).approve(await escrow.getAddress(), AMOUNT);
     await escrow.connect(buyer).deposit(0);
+    await escrow.connect(seller).markShipped(0);
     await escrow.connect(buyer).dispute(0);
     await expect(escrow.connect(stranger).resolve(0, true)).to.be.revertedWith("Escrow: caller is not the arbiter");
   });
@@ -83,9 +95,10 @@ describe("Escrow", function () {
     await escrow.connect(buyer).createOrder(seller.address, await token.getAddress(), AMOUNT, deadline, "一本书");
     await token.connect(buyer).approve(await escrow.getAddress(), AMOUNT);
     await escrow.connect(buyer).deposit(0);
+    await escrow.connect(seller).markShipped(0);
     await escrow.connect(buyer).dispute(0);
     await expect(escrow.connect(arbiter).resolve(0, false)).to.emit(escrow, "OrderResolved").withArgs(0, false);
-    expect((await escrow.getOrder(0)).status).to.equal(3);
+    expect((await escrow.getOrder(0)).status).to.equal(4);
     expect(await token.balanceOf(buyer.address)).to.equal(ethers.parseUnits("100", 18));
   });
 });

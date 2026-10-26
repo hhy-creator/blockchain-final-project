@@ -10,7 +10,7 @@ import {
   useScaffoldWriteContract,
 } from "~~/hooks/scaffold-eth";
 
-const STATUS = ["Created", "Paid", "Completed", "Refunded", "Disputed"] as const;
+const STATUS = ["Created", "Paid", "Shipped", "Completed", "Refunded", "Disputed"] as const;
 const TOKEN_NAME = "LTCToken" as const;
 
 type OrderData = {
@@ -23,6 +23,14 @@ type OrderData = {
   description: string;
 };
 
+type TimelineEvent = {
+  name: string;
+  blockNumber?: bigint;
+  logIndex?: number;
+  transactionHash?: string;
+  detail?: string;
+};
+
 const shortAddress = (address?: string) =>
   address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "-";
 
@@ -31,13 +39,16 @@ function OrderRow({
   currentAddress,
   arbiter,
   escrowAddress,
+  timeline,
 }: {
   id: bigint;
   currentAddress?: Address;
   arbiter?: Address;
   escrowAddress?: Address;
+  timeline: TimelineEvent[];
 }) {
   const [busy, setBusy] = useState(false);
+  const [timelineOpen, setTimelineOpen] = useState(false);
   const { data: rawOrder, refetch } = useScaffoldReadContract({
     contractName: "Escrow",
     functionName: "getOrder",
@@ -56,9 +67,11 @@ function OrderRow({
   const isSeller = currentAddress?.toLowerCase() === order.seller.toLowerCase();
   const isArbiter = currentAddress?.toLowerCase() === arbiter?.toLowerCase();
   const canPay = isBuyer && status === 0;
-  const canConfirm = isBuyer && status === 1;
-  const canDispute = (isBuyer || isSeller) && status === 1;
-  const canResolve = isArbiter && status === 4;
+  const canShip = isSeller && status === 1;
+  const canConfirm = isBuyer && status === 2;
+  const canDispute = (isBuyer || isSeller) && (status === 1 || status === 2);
+  const canRefund = isBuyer && status === 1 && BigInt(Math.floor(Date.now() / 1000)) > order.deadline;
+  const canResolve = isArbiter && status === 5;
 
   const run = async (action: () => Promise<unknown>) => {
     try {
@@ -96,7 +109,9 @@ function OrderRow({
 
       <div className="mt-4 flex flex-wrap gap-2">
         {canPay && <button className="btn btn-primary btn-sm" disabled={busy} onClick={pay}>付款（授权并存入）</button>}
+        {canShip && <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => run(() => writeEscrow({ functionName: "markShipped", args: [id] }))}>标记已发货</button>}
         {canConfirm && <button className="btn btn-success btn-sm" disabled={busy} onClick={() => run(() => writeEscrow({ functionName: "confirm", args: [id] }))}>确认收货</button>}
+        {canRefund && <button className="btn btn-warning btn-sm" disabled={busy} onClick={() => run(() => writeEscrow({ functionName: "refund", args: [id] }))}>超期退款</button>}
         {canDispute && <button className="btn btn-warning btn-sm" disabled={busy} onClick={() => run(() => writeEscrow({ functionName: "dispute", args: [id] }))}>发起争议</button>}
         {canResolve && (
           <>
@@ -104,10 +119,27 @@ function OrderRow({
             <button className="btn btn-info btn-sm" disabled={busy} onClick={() => run(() => writeEscrow({ functionName: "resolve", args: [id, true] }))}>判给卖家</button>
           </>
         )}
-        {!canPay && !canConfirm && !canDispute && !canResolve && (
+        {!canPay && !canShip && !canConfirm && !canRefund && !canDispute && !canResolve && (
           <span className="text-sm text-base-content/60">当前账户没有可执行操作</span>
         )}
       </div>
+
+      <button className="mt-4 text-sm font-medium text-primary underline" onClick={() => setTimelineOpen(open => !open)}>
+        {timelineOpen ? "收起事件时间线" : "展开事件时间线"}
+      </button>
+      {timelineOpen && (
+        <ol className="mt-3 space-y-2 border-l-2 border-primary/30 pl-4 text-sm">
+          {timeline.map((item, index) => (
+            <li key={`${item.transactionHash}-${item.logIndex}-${index}`}>
+              <div className="font-medium">{item.name}{item.detail ? `：${item.detail}` : ""}</div>
+              <div className="text-base-content/60">
+                区块 {item.blockNumber?.toString() ?? "-"} · {item.transactionHash ?? "无交易哈希"}
+              </div>
+            </li>
+          ))}
+          {timeline.length === 0 && <li className="text-base-content/60">暂无事件</li>}
+        </ol>
+      )}
     </article>
   );
 }
@@ -131,6 +163,49 @@ export default function EscrowPage() {
     watch: true,
     blocksBatchSize: 10,
   });
+  const { data: paidEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderPaid", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
+  const { data: shippedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderShipped", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
+  const { data: disputedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderDisputed", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
+  const { data: completedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderCompleted", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
+  const { data: refundedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderRefunded", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
+  const { data: resolvedEvents } = useScaffoldEventHistory({ contractName: "Escrow", eventName: "OrderResolved", fromBlock: BigInt(escrowInfo?.deployedOnBlock ?? 0), watch: true, blocksBatchSize: 10 });
+
+  const timelineByOrder = useMemo(() => {
+    const all: TimelineEvent[] = [];
+    const add = (events: any[] | undefined, name: string, detail?: (event: any) => string) => {
+      for (const event of events ?? []) {
+        const id = event.args?.id;
+        if (typeof id !== "bigint") continue;
+        all.push({
+          name,
+          blockNumber: event.blockNumber,
+          logIndex: event.logIndex,
+          transactionHash: event.transactionHash,
+          detail: detail?.(event),
+        });
+        (all[all.length - 1] as TimelineEvent & { orderId?: bigint }).orderId = id;
+      }
+    };
+    add(createdEvents, "创建订单");
+    add(paidEvents, "买家付款");
+    add(shippedEvents, "卖家发货");
+    add(disputedEvents, "发起争议");
+    add(completedEvents, "订单完成");
+    add(refundedEvents, "订单退款");
+    add(resolvedEvents, "仲裁完成", event => event.args?.sellerWins ? "判给卖家" : "退给买家");
+    return all.reduce<Record<string, TimelineEvent[]>>((result, item) => {
+      const orderId = (item as TimelineEvent & { orderId?: bigint }).orderId;
+      if (orderId === undefined) return result;
+      const clean = { ...item } as TimelineEvent;
+      delete (clean as TimelineEvent & { orderId?: bigint }).orderId;
+      (result[orderId.toString()] ??= []).push(clean);
+      return result;
+    }, {});
+  }, [createdEvents, paidEvents, shippedEvents, disputedEvents, completedEvents, refundedEvents, resolvedEvents]);
+
+  for (const events of Object.values(timelineByOrder)) {
+    events.sort((a, b) => Number((a.blockNumber ?? 0n) - (b.blockNumber ?? 0n)) || (a.logIndex ?? 0) - (b.logIndex ?? 0));
+  }
 
   const ids = useMemo(() => {
     const values = (createdEvents ?? [])
@@ -202,7 +277,7 @@ export default function EscrowPage() {
         <div className="flex items-center justify-between"><h2 className="text-xl font-semibold">订单列表</h2><span className="text-sm text-base-content/60">共 {ids.length} 笔</span></div>
         {eventsLoading && <p>正在读取链上订单...</p>}
         {!eventsLoading && ids.length === 0 && <p className="rounded-lg border border-dashed border-base-300 p-6 text-base-content/60">暂无订单</p>}
-        {ids.map(id => <OrderRow key={id.toString()} id={id} currentAddress={address} arbiter={arbiter as Address | undefined} escrowAddress={escrowInfo?.address} />)}
+        {ids.map(id => <OrderRow key={id.toString()} id={id} currentAddress={address} arbiter={arbiter as Address | undefined} escrowAddress={escrowInfo?.address} timeline={timelineByOrder[id.toString()] ?? []} />)}
       </section>
     </main>
   );

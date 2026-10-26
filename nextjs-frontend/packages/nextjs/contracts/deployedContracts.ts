@@ -118,6 +118,19 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
+          name: "OrderShipped",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "id",
+              type: "uint256",
+            },
+          ],
           name: "OrderRefunded",
           type: "event",
         },
@@ -298,6 +311,19 @@ const deployedContracts = {
             },
           ],
           stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "id",
+              type: "uint256",
+            },
+          ],
+          name: "markShipped",
+          outputs: [],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
