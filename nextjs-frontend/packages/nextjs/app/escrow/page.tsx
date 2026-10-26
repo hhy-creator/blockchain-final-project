@@ -66,13 +66,18 @@ function OrderRow({
   const { writeContractAsync: writeToken } = useScaffoldWriteContract({ contractName: TOKEN_NAME });
 
   const order = rawOrder as OrderData | undefined;
+  const isBuyer = Boolean(currentAddress && order && currentAddress.toLowerCase() === order.buyer.toLowerCase());
+  const isSeller = Boolean(currentAddress && order && currentAddress.toLowerCase() === order.seller.toLowerCase());
+  useEffect(() => {
+    if (isBuyer) onRole?.("买家");
+    else if (isSeller) onRole?.("卖家");
+  }, [isBuyer, isSeller, onRole]);
+
   if (!order) {
     return <div className="rounded-lg border border-base-300 p-4">订单 {id.toString()} 读取中...</div>;
   }
 
   const status = Number(order.status);
-  const isBuyer = currentAddress?.toLowerCase() === order.buyer.toLowerCase();
-  const isSeller = currentAddress?.toLowerCase() === order.seller.toLowerCase();
   const isArbiter = currentAddress?.toLowerCase() === arbiter?.toLowerCase();
   const canPay = isBuyer && status === 0;
   const canShip = HAS_SHIPPED_STATUS && isSeller && status === 1;
@@ -81,11 +86,6 @@ function OrderRow({
     (isBuyer || isSeller) && (status === 1 || (HAS_SHIPPED_STATUS && status === 2));
   const canRefund = isBuyer && status === 1 && BigInt(Math.floor(Date.now() / 1000)) > order.deadline;
   const canResolve = isArbiter && status === (HAS_SHIPPED_STATUS ? 5 : 4);
-
-  useEffect(() => {
-    if (isBuyer) onRole?.("买家");
-    else if (isSeller) onRole?.("卖家");
-  }, [isBuyer, isSeller, onRole]);
 
   const run = async (action: () => Promise<unknown>) => {
     try {
