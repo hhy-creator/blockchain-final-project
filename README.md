@@ -56,4 +56,4 @@ bash gradlew bootRun
 
 姓名、学号和实际贡献在小组确认后补齐。
 
-SimpleStorage 示例已在测试网部署到 `0x9a40bC3FcE2DEB862723d27C83cE8dBEf260bBE8`；`set(100)` 的[交易](https://scan-testnet.potos.hk/tx/0xdd14e1b8f991e9162579bbc96a655f6f21ea24cefdb75d5b318be09f4e7a1c13)位于区块 2688770，之后 `get` 返回 `100`。
+SimpleStorage 示例已在测试网部署到 `0x9ca218b0730071BCc20BC1D9855C702dBE28793e`；`set(100)` 的[交易](https://scan-testnet.potos.hk/tx/0xb1feedf591d6bb3cb004e8cc2aed775dbfa78c79e7805a7d2fd2344f4c1d734b)位于区块 2689002，之后 `get` 返回 `100`。
