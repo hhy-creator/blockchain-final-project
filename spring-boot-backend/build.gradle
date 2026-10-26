@@ -50,7 +50,3 @@ tasks.whenTaskAdded { task ->
         task.dependsOn(tasks.named('processResources'))
     }
 }
-solidity {
-    executable = "${System.properties['user.home']}/.web3j/solc/0.8.13/solc"
-    version = "0.8.13"
-}

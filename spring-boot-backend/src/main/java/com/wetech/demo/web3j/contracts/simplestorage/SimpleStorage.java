@@ -29,14 +29,14 @@ import org.web3j.tx.gas.ContractGasProvider;
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
  * <p>Please use the <a href="https://docs.web3j.io/command_line.html">web3j command line tools</a>,
- * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
+ * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the
  * <a href="https://github.com/LFDT-web3j/web3j/tree/main/codegen">codegen module</a> to update.
  *
  * <p>Generated with web3j version 4.14.0.
  */
 @SuppressWarnings("rawtypes")
 public class SimpleStorage extends Contract {
-    public static final String BINARY = "608060405234801561001057600080fd5b5060e68061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c806360fe47b11460375780636d4ce63c146048575b600080fd5b604660423660046098565b605d565b005b60005460405190815260200160405180910390f35b60008190556040518181527f30abf1e3f71dc652b1df75682ae16af5c006ad42cd23d00001e8e106d8af4e1d9060200160405180910390a150565b60006020828403121560a957600080fd5b503591905056fea2646970667358221220fe3619559a4a874bb87a065cacc90ae59f71b75ff197fa09b30aa8fc179e8f2d64736f6c634300080d0033";
+    public static final String BINARY = "6080604052348015600e575f5ffd5b5060df80601a5f395ff3fe6080604052348015600e575f5ffd5b50600436106030575f3560e01c806360fe47b11460345780636d4ce63c146045575b5f5ffd5b6043603f3660046093565b6059565b005b5f5460405190815260200160405180910390f35b5f8190556040518181527f30abf1e3f71dc652b1df75682ae16af5c006ad42cd23d00001e8e106d8af4e1d9060200160405180910390a150565b5f6020828403121560a2575f5ffd5b503591905056fea26469706673582212200310bd0861c872671660aa8418a683132498ee6fc31a63f0f2d8a0ddde4f0a8464736f6c63430008230033";
 
     private static String librariesLinkedBinary;
 
@@ -44,7 +44,7 @@ public class SimpleStorage extends Contract {
 
     public static final String FUNC_SET = "set";
 
-    public static final Event DATACHANGED_EVENT = new Event("DataChanged", 
+    public static final Event DATACHANGED_EVENT = new Event("DataChanged",
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
     ;
 
@@ -103,16 +103,16 @@ public class SimpleStorage extends Contract {
     }
 
     public RemoteFunctionCall<BigInteger> get() {
-        final Function function = new Function(FUNC_GET, 
-                Arrays.<Type>asList(), 
+        final Function function = new Function(FUNC_GET,
+                Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public RemoteFunctionCall<TransactionReceipt> set(BigInteger x) {
         final Function function = new Function(
-                FUNC_SET, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(x)), 
+                FUNC_SET,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(x)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }

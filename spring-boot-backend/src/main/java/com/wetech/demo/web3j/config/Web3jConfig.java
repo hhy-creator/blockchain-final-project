@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import okhttp3.OkHttpClient;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
@@ -11,6 +12,10 @@ import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 
 import java.math.BigInteger;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URI;
+import java.time.Duration;
 
 @Slf4j
 @Configuration
@@ -19,10 +24,10 @@ public class Web3jConfig {
     @Value("${web3j.client-address:http://localhost:8545}")
     private String clientAddress;
 
-    @Value("${web3j.private-key:0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63}")
+    @Value("${web3j.private-key}")
     private String privateKey;
 
-    @Value("${web3j.gas-price:20000000000}")
+    @Value("${web3j.gas-price:1000000}")
     private String gasPrice;
 
     @Value("${web3j.gas-limit:6721975}")
@@ -31,7 +36,23 @@ public class Web3jConfig {
     @Bean
     public Web3j web3j() {
         log.info("Connecting to Ethereum client: {}", clientAddress);
-        return Web3j.build(new HttpService(clientAddress));
+        OkHttpClient.Builder client = HttpService.getOkHttpClientBuilder()
+                .connectTimeout(Duration.ofSeconds(20))
+                .readTimeout(Duration.ofSeconds(60));
+        String proxyUrl = System.getenv("HTTPS_PROXY");
+        if (proxyUrl == null || proxyUrl.isBlank()) {
+            proxyUrl = System.getenv("https_proxy");
+        }
+        if (proxyUrl != null && !proxyUrl.isBlank()) {
+            URI uri = URI.create(proxyUrl);
+            if (uri.getHost() == null) {
+                throw new IllegalArgumentException("HTTPS_PROXY must be a URL with a host");
+            }
+            int port = uri.getPort() < 0 ? 80 : uri.getPort();
+            client.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(uri.getHost(), port)));
+            log.info("Using HTTPS_PROXY for RPC connection");
+        }
+        return Web3j.build(new HttpService(clientAddress, client.build()));
     }
 
     @Bean
