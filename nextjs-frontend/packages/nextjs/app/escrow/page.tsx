@@ -10,7 +10,12 @@ import {
   useScaffoldWriteContract,
 } from "~~/hooks/scaffold-eth";
 
-const STATUS = ["Created", "Paid", "Shipped", "Completed", "Refunded", "Disputed"] as const;
+// The configured POTOS address is still the original Escrow deployment.
+// Flip this after deploying the Shipped-enabled Escrow and updating its address.
+const HAS_SHIPPED_STATUS = false;
+const STATUS = HAS_SHIPPED_STATUS
+  ? (["Created", "Paid", "Shipped", "Completed", "Refunded", "Disputed"] as const)
+  : (["Created", "Paid", "Completed", "Refunded", "Disputed"] as const);
 const TOKEN_NAME = "LTCToken" as const;
 
 type OrderData = {
@@ -67,11 +72,12 @@ function OrderRow({
   const isSeller = currentAddress?.toLowerCase() === order.seller.toLowerCase();
   const isArbiter = currentAddress?.toLowerCase() === arbiter?.toLowerCase();
   const canPay = isBuyer && status === 0;
-  const canShip = isSeller && status === 1;
-  const canConfirm = isBuyer && status === 2;
-  const canDispute = (isBuyer || isSeller) && (status === 1 || status === 2);
+  const canShip = HAS_SHIPPED_STATUS && isSeller && status === 1;
+  const canConfirm = isBuyer && (HAS_SHIPPED_STATUS ? status === 2 : status === 1);
+  const canDispute =
+    (isBuyer || isSeller) && (status === 1 || (HAS_SHIPPED_STATUS && status === 2));
   const canRefund = isBuyer && status === 1 && BigInt(Math.floor(Date.now() / 1000)) > order.deadline;
-  const canResolve = isArbiter && status === 5;
+  const canResolve = isArbiter && status === (HAS_SHIPPED_STATUS ? 5 : 4);
 
   const run = async (action: () => Promise<unknown>) => {
     try {
