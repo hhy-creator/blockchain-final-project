@@ -4,7 +4,7 @@ Spring Boot 3、Web3j 4、Java 21 服务。后端账户部署 Escrow 并作为�
 
 ## 运行
 
-需要 JDK 21、POTOS Testnet（Chain ID 60600）和有测试币的后端仲裁账户。私钥仅通过运行环境变量 `WEB3J_PRIVATE_KEY` 注入，不能写入仓库、配置文件或截图。RPC 地址和 gas 参数见 `src/main/resources/application.properties`。
+需要 JDK 21、Node.js 与 npm（可从 PATH 使用）、POTOS Testnet（Chain ID 60600）和有测试币的后端仲裁账户。私钥仅通过运行环境变量 `WEB3J_PRIVATE_KEY` 注入，不能写入仓库、配置文件或截图。RPC 地址和 gas 参数见 `src/main/resources/application.properties`。
 
 ```bash
 bash gradlew generateContractWrappers

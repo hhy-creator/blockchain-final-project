@@ -4,7 +4,7 @@
 
 ## 运行路线 A
 
-需要 Java 21、Gradle Wrapper、POTOS Testnet 测试币，以及专门的后端仲裁账户。进入 `spring-boot-backend/`，在启动终端安全设置 `WEB3J_PRIVATE_KEY` 环境变量后运行：
+需要 Java 21、Node.js 与 npm（可从 PATH 使用）、Gradle Wrapper、POTOS Testnet 测试币，以及专门的后端仲裁账户。进入 `spring-boot-backend/`，在启动终端安全设置 `WEB3J_PRIVATE_KEY` 环境变量后运行：
 
 ```bash
 bash gradlew generateContractWrappers
@@ -38,6 +38,13 @@ bash gradlew bootRun
 | resolve 失败 | 待填或注明未广播 | 待填或注明未上链 | 后端账户 |
 
 订单 1 的创建与付款也须保留交易记录。报告按课程《大作业报告模板》填写截图 4A-1 至 4A-8、解释 4A-1 至 4A-6、分工表和 AI 使用说明。
+
+额外交易记录（用于完整追踪订单 1）：
+
+| 操作 | 交易哈希 | 区块浏览器链接 | 发起账户 |
+|---|---|---|---|
+| createOrder 订单 1 | 待填 | 待填 | 买家 |
+| deposit 订单 1 | 待填 | 待填 | 买家 |
 
 ## 分工
 
