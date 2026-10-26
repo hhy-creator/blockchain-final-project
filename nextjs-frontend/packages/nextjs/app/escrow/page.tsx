@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { formatUnits, isAddress, parseUnits, type Address } from "viem";
 import { useAccount } from "wagmi";
 import {
@@ -46,12 +46,14 @@ function OrderRow({
   arbiter,
   escrowAddress,
   timeline,
+  onRole,
 }: {
   id: bigint;
   currentAddress?: Address;
   arbiter?: Address;
   escrowAddress?: Address;
   timeline: TimelineEvent[];
+  onRole?: (role: "买家" | "卖家") => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [timelineOpen, setTimelineOpen] = useState(false);
@@ -79,6 +81,11 @@ function OrderRow({
     (isBuyer || isSeller) && (status === 1 || (HAS_SHIPPED_STATUS && status === 2));
   const canRefund = isBuyer && status === 1 && BigInt(Math.floor(Date.now() / 1000)) > order.deadline;
   const canResolve = isArbiter && status === (HAS_SHIPPED_STATUS ? 5 : 4);
+
+  useEffect(() => {
+    if (isBuyer) onRole?.("买家");
+    else if (isSeller) onRole?.("卖家");
+  }, [isBuyer, isSeller, onRole]);
 
   const run = async (action: () => Promise<unknown>) => {
     try {
@@ -158,6 +165,7 @@ export default function EscrowPage() {
   const [minutes, setMinutes] = useState("30");
   const [description, setDescription] = useState("实验订单");
   const [formError, setFormError] = useState("");
+  const [roleFromOrder, setRoleFromOrder] = useState<"买家" | "卖家" | undefined>();
 
   const { data: escrowInfo } = useDeployedContractInfo({ contractName: "Escrow" });
   const { data: tokenInfo } = useDeployedContractInfo({ contractName: TOKEN_NAME });
@@ -238,8 +246,12 @@ export default function EscrowPage() {
     });
     if (event?.args?.buyer?.toLowerCase() === address.toLowerCase()) return "买家";
     if (event?.args?.seller?.toLowerCase() === address.toLowerCase()) return "卖家";
-    return "旁观者";
-  }, [address, arbiter, createdEvents]);
+    return roleFromOrder ?? "旁观者";
+  }, [address, arbiter, createdEvents, roleFromOrder]);
+
+  const handleOrderRole = useCallback((role: "买家" | "卖家") => {
+    setRoleFromOrder(role);
+  }, []);
 
   const createOrder = async (event: FormEvent) => {
     event.preventDefault();
@@ -289,7 +301,7 @@ export default function EscrowPage() {
         <div className="flex items-center justify-between"><h2 className="text-xl font-semibold">订单列表</h2><span className="text-sm text-base-content/60">共 {ids.length} 笔</span></div>
         {eventsLoading && <p>正在读取链上订单...</p>}
         {!eventsLoading && ids.length === 0 && <p className="rounded-lg border border-dashed border-base-300 p-6 text-base-content/60">暂无订单</p>}
-        {ids.map(id => <OrderRow key={id.toString()} id={id} currentAddress={address} arbiter={arbiter as Address | undefined} escrowAddress={escrowInfo?.address} timeline={timelineByOrder[id.toString()] ?? []} />)}
+        {ids.map(id => <OrderRow key={id.toString()} id={id} currentAddress={address} arbiter={arbiter as Address | undefined} escrowAddress={escrowInfo?.address} timeline={timelineByOrder[id.toString()] ?? []} onRole={handleOrderRole} />)}
       </section>
     </main>
   );
