@@ -19,7 +19,7 @@ bash gradlew bootRun
 | 项目 | 地址 |
 |---|---|
 | 后端仲裁账户 | `0xbEAa3a6692C6FC388712E6f96eaA9B4d9168Ff16` |
-| 本次后端部署的 Escrow | `0x3827e86d03e41784d6bdF19130b724AC6B6b93bC`（区块 2688775） |
+| 本次后端部署的 Escrow | `0x49C0DF2C2eDf13EA769e61036bfd5e1EE9618B07`（区块 2689090） |
 | 组长的 HHYToken（实验 3 候选） | `0x8E8a9195E32709e62BC8FaC445c983dB2A2c2900` |
 
 ## 交易记录
@@ -28,7 +28,7 @@ bash gradlew bootRun
 
 | 操作 | 交易哈希 | 区块浏览器链接 | 发起账户 |
 |---|---|---|---|
-| 部署 Escrow | `0xe1cd56cb97a5b37ed6146dde585d0b8a26e84aabb46b1f299ad714f393feb968` | [查看交易](https://scan-testnet.potos.hk/tx/0xe1cd56cb97a5b37ed6146dde585d0b8a26e84aabb46b1f299ad714f393feb968) | 后端账户 `0xbEAa…8Ff16` |
+| 部署 Escrow | `0x9b75a9d84a2580695c89bb5ea184c25e7e44f6aa5e657bbfb0b518475e5187a1` | [查看交易](https://scan-testnet.potos.hk/tx/0x9b75a9d84a2580695c89bb5ea184c25e7e44f6aa5e657bbfb0b518475e5187a1) | 后端账户 `0xbEAa…8Ff16` |
 | createOrder 订单 0 | 待填 | 待填 | 买家 |
 | approve | 待填 | 待填 | 买家 |
 | deposit 订单 0 | 待填 | 待填 | 买家 |

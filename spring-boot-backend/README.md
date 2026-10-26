@@ -60,17 +60,17 @@ SimpleStorage 示例接口仍保留在 `/api/storage`，供教程 4.4 节验收�
 
 ## 合约地址与交易记录
 
-组长实验 3 的 HHYToken 候选地址为 `0x8E8a9195E32709e62BC8FaC445c983dB2A2c2900`，已确认该地址在 POTOS 上有合约代码。本次后端 Escrow 为 `0x3827e86d03e41784d6bdF19130b724AC6B6b93bC`，部署区块 `2688775`，仲裁账户 `0xbEAa3a6692C6FC388712E6f96eaA9B4d9168Ff16`。服务重启后可调用：
+组长实验 3 的 HHYToken 候选地址为 `0x8E8a9195E32709e62BC8FaC445c983dB2A2c2900`，已确认该地址在 POTOS 上有合约代码。本次后端 Escrow 为 `0x49C0DF2C2eDf13EA769e61036bfd5e1EE9618B07`，部署区块 `2689090`，仲裁账户 `0xbEAa3a6692C6FC388712E6f96eaA9B4d9168Ff16`。服务重启后可调用：
 
 ```bash
-curl --noproxy '*' -X POST 'http://localhost:8080/api/escrow/load?address=0x3827e86d03e41784d6bdF19130b724AC6B6b93bC&fromBlock=2688775'
+curl --noproxy '*' -X POST 'http://localhost:8080/api/escrow/load?address=0x49C0DF2C2eDf13EA769e61036bfd5e1EE9618B07&fromBlock=2689090'
 ```
 
 以下表格必须在组内实际交易后填写，链接使用 `https://scan-testnet.potos.hk/tx/` 加交易哈希。
 
 | 操作 | 交易哈希 | 区块浏览器链接 | 发起账户 |
 |---|---|---|---|
-| 部署 Escrow | `0xe1cd56cb97a5b37ed6146dde585d0b8a26e84aabb46b1f299ad714f393feb968` | [查看交易](https://scan-testnet.potos.hk/tx/0xe1cd56cb97a5b37ed6146dde585d0b8a26e84aabb46b1f299ad714f393feb968) | `0xbEAa…8Ff16` |
+| 部署 Escrow | `0x9b75a9d84a2580695c89bb5ea184c25e7e44f6aa5e657bbfb0b518475e5187a1` | [查看交易](https://scan-testnet.potos.hk/tx/0x9b75a9d84a2580695c89bb5ea184c25e7e44f6aa5e657bbfb0b518475e5187a1) | `0xbEAa…8Ff16` |
 | createOrder 订单 0 | 待填 | 待填 | 买家 |
 | approve | 待填 | 待填 | 买家 |
 | deposit 订单 0 | 待填 | 待填 | 买家 |
