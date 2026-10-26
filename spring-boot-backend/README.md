@@ -60,7 +60,7 @@ SimpleStorage 示例接口仍保留在 `/api/storage`，供教程 4.4 节验收�
 
 ## 合约地址与交易记录
 
-组长实验 3 的 HHYToken 候选地址为 `0x8E8a9195E32709e62BC8FaC445c983dB2A2c2900`，已确认该地址在 POTOS 上有合约代码。本次后端 Escrow 为 `0x49C0DF2C2eDf13EA769e61036bfd5e1EE9618B07`，部署区块 `2689090`，仲裁账户 `0xbEAa3a6692C6FC388712E6f96eaA9B4d9168Ff16`。服务重启后可调用：
+组长实验 3 的 HHYToken 候选地址为 `0x8E8a9195E32709e62BC8FaC445c983dB2A2c2900`，已确认该地址在 POTOS 上有合约代码。买家 A 为 `0x30f2f3d3f23ec2DF6CEB20d4031035615C22A6FE`，卖家 B 为 `0x83a5F28c1d95Ef60F4bb7020577a651C02dFb8a2`。本次后端 Escrow 为 `0x49C0DF2C2eDf13EA769e61036bfd5e1EE9618B07`，部署区块 `2689090`，仲裁账户 `0xbEAa3a6692C6FC388712E6f96eaA9B4d9168Ff16`。服务重启后可调用：
 
 ```bash
 curl --noproxy '*' -X POST 'http://localhost:8080/api/escrow/load?address=0x49C0DF2C2eDf13EA769e61036bfd5e1EE9618B07&fromBlock=2689090'

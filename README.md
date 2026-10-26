@@ -18,6 +18,8 @@ bash gradlew bootRun
 
 | 项目 | 地址 |
 |---|---|
+| 买家 A | `0x30f2f3d3f23ec2DF6CEB20d4031035615C22A6FE` |
+| 卖家 B | `0x83a5F28c1d95Ef60F4bb7020577a651C02dFb8a2` |
 | 后端仲裁账户 | `0xbEAa3a6692C6FC388712E6f96eaA9B4d9168Ff16` |
 | 本次后端部署的 Escrow | `0x49C0DF2C2eDf13EA769e61036bfd5e1EE9618B07`（区块 2689090） |
 | 组长的 HHYToken（实验 3 候选） | `0x8E8a9195E32709e62BC8FaC445c983dB2A2c2900` |
