@@ -37,11 +37,11 @@ bash gradlew bootRun
 例如：
 
 ```bash
-curl -X POST http://localhost:8080/api/escrow/deploy
-curl http://localhost:8080/api/escrow/address
-curl http://localhost:8080/api/escrow/orders
-curl 'http://localhost:8080/api/escrow/orders/0'
-curl -X POST 'http://localhost:8080/api/escrow/orders/1/resolve?sellerWins=false'
+curl --noproxy '*' -X POST http://localhost:8080/api/escrow/deploy
+curl --noproxy '*' http://localhost:8080/api/escrow/address
+curl --noproxy '*' http://localhost:8080/api/escrow/orders
+curl --noproxy '*' 'http://localhost:8080/api/escrow/orders/0'
+curl --noproxy '*' -X POST 'http://localhost:8080/api/escrow/orders/1/resolve?sellerWins=false'
 ```
 
 SimpleStorage 示例接口仍保留在 `/api/storage`，供教程 4.4 节验收。
@@ -63,7 +63,7 @@ SimpleStorage 示例接口仍保留在 `/api/storage`，供教程 4.4 节验收�
 组长实验 3 的 HHYToken 候选地址为 `0x8E8a9195E32709e62BC8FaC445c983dB2A2c2900`，已确认该地址在 POTOS 上有合约代码。本次后端 Escrow 为 `0x3827e86d03e41784d6bdF19130b724AC6B6b93bC`，部署区块 `2688775`，仲裁账户 `0xbEAa3a6692C6FC388712E6f96eaA9B4d9168Ff16`。服务重启后可调用：
 
 ```bash
-curl -X POST 'http://localhost:8080/api/escrow/load?address=0x3827e86d03e41784d6bdF19130b724AC6B6b93bC&fromBlock=2688775'
+curl --noproxy '*' -X POST 'http://localhost:8080/api/escrow/load?address=0x3827e86d03e41784d6bdF19130b724AC6B6b93bC&fromBlock=2688775'
 ```
 
 以下表格必须在组内实际交易后填写，链接使用 `https://scan-testnet.potos.hk/tx/` 加交易哈希。
